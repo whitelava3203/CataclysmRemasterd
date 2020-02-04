@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static DataStructure;
+using static CataclysmRemasterd.DataStructure;
 
 namespace CataclysmRemasterd
 {

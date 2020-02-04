@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using static DataStructure;
+using static CataclysmRemasterd.DataStructure;
 using Microsoft.Xna.Framework.Graphics;
 using CataclysmRemasterd;
 using System.CodeDom.Compiler;
@@ -15,7 +15,7 @@ using Microsoft.CodeDom.Providers;
 
 namespace CataclysmRemasterd
 {
-    public class DataLoader// : MonoBehaviour
+    public class DataLoader
     {
 
         private static  List<DirectoryInfo> ModFolderDiList = new List<DirectoryInfo>();

@@ -68,7 +68,7 @@ namespace CataclysmRemasterd
 
 
             graphic.Begin();
-            graphic.DrawString(_spriteFont, "Hello MonoGame!", new Vector2(1000, 100), Color.White);
+            graphic.DrawString(_spriteFont, "OHMYGOD", new Vector2(1000, 100), Color.White);
             graphic.End();
 
             base.Draw(gameTime);
