@@ -195,7 +195,7 @@ public class DataStructure
         }
         public class Tile : Drawable
         {
-
+            
             public LangString Name = new LangString();
             public LangString Explanation = new LangString();
             public LangString DeathHelp = new LangString();
@@ -367,12 +367,12 @@ public class CodeDictionary<T> : Dictionary<string,T> where T : CodeObject
 }
 public class A
 {
-    private string str = "SIBALSEX";
+    private string str = "AAAAAAAA";
     B b = new B();
 }
 public class B
 {
-    private string str = "YOU ARE DIE";
+    private string str = "BBBBBBBB";
     A a = new A();
 }
 
@@ -391,8 +391,20 @@ public class DrawDictionary<T> : CodeDictionary<T> where T : Drawable
 */
 public class CodeObject
 {
-    public string CodeName;
-    public static DataStorage MainStorage;
+    private string _CodeName;
+    public string CodeName
+    {
+        get
+        {
+            return this.modInfo.FullName + @"\" + _CodeName;
+        }
+        set
+        {
+            _CodeName = value;
+        }
+    }
+    public ModInfo modInfo;
+    //public static DataStorage MainStorage;
 }
 public class Drawable : CodeObject
 {
@@ -423,7 +435,18 @@ public class Drawable : CodeObject
         Three
     }
     public bool IsShapedImage = false;
-    public string ImagePath;
+    private string _ImagePath;
+    public string ImagePath
+    {
+        get
+        {
+            return base.modInfo.FullName + "/" + _ImagePath;
+        }
+        set
+        {
+            _ImagePath = value;
+        }
+    }
     public double ImageSize;
     public EPriority Priority;
     public EShape Shape;
@@ -442,10 +465,9 @@ public class Drawable : CodeObject
             {
                 str = this.CodeName;
             }
-
-            if (MainStorage.ImageStorage.ContainsKey(str))
+            if (StaticUse.mainstorage.ImageStorage.ContainsKey(str))
             {
-                return MainStorage.ImageStorage[str];
+                return StaticUse.mainstorage.ImageStorage[str];
             }
             else
             {
@@ -461,26 +483,24 @@ public class Drawable : CodeObject
                     str1 = this.CodeName;
                     str2 = this.ImagePath;
                 }
-                str2 = Path.Combine(Staticuse.ModPath, str2);
+                str2 = Path.Combine(StaticUse.ModPath, str2);
 
-                if (Staticuse.mainstorage.ImageStorage.ContainsKey(str1))
+                if (StaticUse.mainstorage.ImageStorage.ContainsKey(str1))
                 {
-                    return Staticuse.mainstorage.ImageStorage[str1];
+                    return StaticUse.mainstorage.ImageStorage[str1];
                 }
                 else
                 {
-                    FileStream fileStream = new FileStream(str2, FileMode.Open);
-                    Texture2D texture = Texture2D.FromStream(Staticuse.gd, fileStream);
-                    fileStream.Dispose();
-                    if (texture == null)
+                    Texture2D sprite = StaticUse.LoadPNG(str2);
+                    if (sprite == null)
                     {
                         //Debug.Log(@"오류/파일" + str2 + " 을 찿을수 없습니다.");
                         return null;
                     }
                     else
                     {
-                        Staticuse.mainstorage.ImageStorage.Add(str, texture);
-                        return texture;
+                        StaticUse.mainstorage.ImageStorage.Add(str, sprite);
+                        return sprite;
                     }
 
                 }

@@ -11,24 +11,25 @@ using System.CodeDom.Compiler;
 using System.Reflection;
 using Microsoft.CSharp;
 using ObjectSaver;
+using Microsoft.CodeDom.Providers;
 
 namespace CataclysmRemasterd
 {
     public class DataLoader// : MonoBehaviour
     {
 
-        public List<DirectoryInfo> ModFolderDiList = new List<DirectoryInfo>();
+        private static  List<DirectoryInfo> ModFolderDiList = new List<DirectoryInfo>();
 
-        public void LoadMods(ref DataStorage datastorage)
+        public static void LoadMods()
         {
-            //Debug.Log(System.Environment.CurrentDirectory);
+            StaticUse.Initalize();
             LoadMod();
         }
-        private List<string> LoadModList()
+        private static List<string> LoadModList()
         {
 
             ModFolderDiList = new List<DirectoryInfo>();
-            DirectoryInfo di = new DirectoryInfo(Staticuse.ModPath);
+            DirectoryInfo di = new DirectoryInfo(StaticUse.ModPath);
             List<string> str2 = new List<string>();
             if (di.Exists)
             {
@@ -63,7 +64,7 @@ namespace CataclysmRemasterd
             return new List<String>();
         }
 
-        private void LoadMod()
+        private static void LoadMod()
         {
             List<string> ModFolderPathList = LoadModList();
             foreach (string ModFolderPath in ModFolderPathList)
@@ -75,7 +76,7 @@ namespace CataclysmRemasterd
 
 
 
-        private void LoadSingleMod(string ModFolderPath)
+        private static void LoadSingleMod(string ModFolderPath)
         {
             string path1 = Path.Combine(ModFolderPath, "Modinfo.dat");
             string str = "";
@@ -88,15 +89,20 @@ namespace CataclysmRemasterd
                 //Debug.Log(@"(DataLoader.LoadSingleMod)오류/" + path1 + " 모드인포 파일을 찾을수 없습니다.");
                 return;
             }
-            ModInfo info = ObjectSaver.ObjectSaver.Load<ModInfo>(path1);
-            byte[] scriptdata = File.ReadAllBytes(Path.Combine(ModFolderPath,info.ScriptPath));
+            object obj2 = ObjectSaver.ObjectSaver.Load(path1);
+            ModInfo info = ObjectSaver.ObjectSaver.Load(path1) as ModInfo;
+            string scriptpath = Path.Combine(ModFolderPath,info.ScriptPath);
 
-            CSharpCodeProvider provider = new CSharpCodeProvider();
+            //CSharpCodeProvider provider = new CSharpCodeProvider();
+            CodeDomProvider provider = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider();
+            
             CompilerParameters parameters = new CompilerParameters();
             parameters.GenerateInMemory = true;
-            parameters.GenerateExecutable = true;
-
-            CompilerResults results = provider.CompileAssemblyFromSource(parameters, "");
+            parameters.GenerateExecutable = false;
+            //parameters.CoreAssemblyFileName = "CataclysmRemasterd";
+            parameters.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
+            //parameters.ReferencedAssemblies.Add("System.dll");
+            CompilerResults results = provider.CompileAssemblyFromFile(parameters, scriptpath);
             if (results.Errors.HasErrors)
             {
                 StringBuilder sb = new StringBuilder();
@@ -110,20 +116,19 @@ namespace CataclysmRemasterd
             }
             Assembly assembly = results.CompiledAssembly;
 
-            string typeloc = info.Author + "." + info.ModName;
-
-            Type program = assembly.GetType(typeloc);
-            object obj = assembly.CreateInstance(typeloc);
-
+            Type[] ts = assembly.GetTypes();
+            Type program = assembly.GetType(info.FullName);
+            object obj = assembly.CreateInstance(info.FullName);
 
 
-            program.GetField("data").SetValue(obj, Staticuse.mainstorage);
+
+            program.GetField("data").SetValue(obj, StaticUse.mainstorage);
             program.GetMethod("Initialize").Invoke(obj, null);
             DataLoadScript loader = program.GetField("load").GetValue(obj) as DataLoadScript;
-            Staticuse.mainstorage.LoadedModAssembly.Add(assembly);
+            StaticUse.mainstorage.LoadedModAssembly.Add(assembly);
 
 
-            DataLoadScriptLoader.Load(loader);
+            DataLoadScriptLoader.Load(loader,info);
         }
         private string Zip(string str)
         {
@@ -164,22 +169,27 @@ namespace CataclysmRemasterd
 
 
 
-        public static void Load(DataLoadScript loader)
+        public static void Load(DataLoadScript loader,ModInfo modinfo)
         {
 
             foreach (Func<DataStructure.Map.Tile> tileload in loader.TileList)
             {
                 Map.Tile tile = tileload();
-                Staticuse.mainstorage.TileStorage.Add(tile);
+                tile.modInfo = modinfo;
+                StaticUse.mainstorage.TileStorage.Add(tile);
                 _=tile.sprite;
             }
             foreach (Func<DataStructure.Map.Material> materialload in loader.MaterialList)
             {
-                Staticuse.mainstorage.MaterialStorage.Add(materialload());
+                Map.Material material = materialload();
+                material.modInfo = modinfo;
+                StaticUse.mainstorage.MaterialStorage.Add(material);
             }
             foreach (Func<DataStructure.Map.BaseChunk> basechunkload in loader.BaseChunkList)
             {
-                Staticuse.mainstorage.BaseChunkStorage.Add(basechunkload());
+                Map.BaseChunk basechunk = basechunkload();
+                basechunk.modInfo = modinfo;
+                StaticUse.mainstorage.BaseChunkStorage.Add(basechunk);
             }
 
         }
@@ -190,6 +200,13 @@ namespace CataclysmRemasterd
         public string Author;
         public string ModName;
         public string ScriptPath = "Script.cs";
-        public bool BlockDanagerScript = true;
+        public bool BlockDangerScript = true;
+        public string FullName
+        {
+            get
+            {
+                return this.Author + "." + this.ModName;
+            }
+        }
     }
 }
