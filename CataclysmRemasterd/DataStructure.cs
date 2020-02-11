@@ -5,11 +5,11 @@ using System.Text;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Numerics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using CataclysmRemasterd;
 using System.Reflection;
+using System.Linq.Expressions;
 
 namespace CataclysmRemasterd
 {
@@ -58,7 +58,7 @@ namespace CataclysmRemasterd
 
         public class Map
         {
-
+            /*
             public class Chunk : List<Map.TileContainer>
             {
                 public ChunkContainer UpperContainer;
@@ -140,6 +140,7 @@ namespace CataclysmRemasterd
                 }
 
             }
+            
             public class WorldMap
             {
                 public List<ChunkContainer> ChunkContainerList = new List<ChunkContainer>();
@@ -164,6 +165,8 @@ namespace CataclysmRemasterd
                     return null;
                 }
             }
+            */
+            /*
             public class BaseChunk : CodeObject
             {
                 public List<ChunkContainer> ChunkContainerList = new List<ChunkContainer>();
@@ -195,6 +198,7 @@ namespace CataclysmRemasterd
                     return sb.ToString();
                 }
             }
+            */
             public class Tile : Drawable
             {
 
@@ -208,14 +212,7 @@ namespace CataclysmRemasterd
             }
             public class TileContainer : IntPos
             {
-                public Chunk UpperChunk;
-                public Map.ChunkContainer UpperContainer
-                {
-                    get
-                    {
-                        return UpperChunk.UpperContainer;
-                    }
-                }
+                public bool IsActive = false;
 
 
                 private Map.Tile _Data;
@@ -237,6 +234,13 @@ namespace CataclysmRemasterd
                     {
                         _Position = value;
                         Syncronize();
+                    }
+                }
+                public Vector2 PosVector2
+                {
+                    get
+                    {
+                        return new Vector2(Position.X,Position.Y);
                     }
                 }
 
@@ -298,7 +302,7 @@ namespace CataclysmRemasterd
         public List<Func<DataStructure.Map.Tile>> TileList = new List<Func<DataStructure.Map.Tile>>();
         public List<Func<DataStructure.Map.Material>> MaterialList = new List<Func<DataStructure.Map.Material>>();
 
-        public List<Func<DataStructure.Map.BaseChunk>> BaseChunkList = new List<Func<DataStructure.Map.BaseChunk>>();
+        //public List<Func<DataStructure.Map.BaseChunk>> BaseChunkList = new List<Func<DataStructure.Map.BaseChunk>>();
     }
 
 
@@ -398,7 +402,7 @@ namespace CataclysmRemasterd
         {
             get
             {
-                return this.modInfo.FullName + @"\" + _CodeName;
+                return this.modInfo.FullName + @"/" + _CodeName;
             }
             set
             {
@@ -519,16 +523,46 @@ namespace CataclysmRemasterd
         public CodeDictionary<DataStructure.Map.Material> MaterialStorage = new CodeDictionary<DataStructure.Map.Material>();
         public Dictionary<string, Texture2D> ImageStorage = new Dictionary<string, Texture2D>();
 
-        public CodeDictionary<DataStructure.Map.BaseChunk> BaseChunkStorage = new CodeDictionary<DataStructure.Map.BaseChunk>();
+        //public CodeDictionary<DataStructure.Map.BaseChunk> BaseChunkStorage = new CodeDictionary<DataStructure.Map.BaseChunk>();
 
 
         public List<Assembly> LoadedModAssembly = new List<Assembly>();
+        public List<object> LoadedModObject = new List<object>();
     }
+    /*
+    public class ChainActionDictionary// : Dictionary<string,List<Action>>
+    {
+        private List<ChainAction> _value;
+        private List<string> _key;
 
+        public ChainAction this[string key]
+        {
+            get
+            {
 
+                return _value[_key.IndexOf(key)];
+            }
+        }
+    }
+    public class ChainAction
+    {
+        private List<Action> _value = new List<Action>();
 
-
-
+        public void Add(Action act)
+        {
+            _value.Add(act);
+        }
+        public void Invoke()
+        {
+            _value.ForEach((act)=> { act.Invoke(); });
+        }
+        public static implicit operator ChainAction(LambdaExpression le)
+        {
+            Action ac;
+            return new ChainAction();
+        }
+    }
+    */
     public static class ExtensionMethods
     {
         // Deep clone
@@ -541,6 +575,11 @@ namespace CataclysmRemasterd
                 stream.Position = 0;
                 return (T)formatter.Deserialize(stream);
             }
+        }
+
+        public static float BetweenLength(this Vector2 v2, Vector2 v3)
+        {
+            return (float)Math.Sqrt(((v2.X - v3.X) * (v2.X - v3.X)) + ((v2.Y - v3.Y) * (v2.Y - v3.Y)));
         }
     }
 }

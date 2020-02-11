@@ -126,7 +126,7 @@ namespace CataclysmRemasterd
             program.GetMethod("Initialize").Invoke(obj, null);
             DataLoadScript loader = program.GetField("load").GetValue(obj) as DataLoadScript;
             StaticUse.mainstorage.LoadedModAssembly.Add(assembly);
-
+            StaticUse.mainstorage.LoadedModObject.Add(obj);
 
             DataLoadScriptLoader.Load(loader,info);
         }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static CataclysmRemasterd.DataStructure.Map;
 
 namespace CataclysmRemasterd
 {
@@ -24,6 +25,8 @@ namespace CataclysmRemasterd
         public static GraphicsDeviceManager gdm;
         public static DataStorage mainstorage = new DataStorage();
         public static GraphicsDevice gd = new GraphicsDevice(GraphicsAdapter.DefaultAdapter, GraphicsProfile.HiDef, new PresentationParameters());
+        public static List<TileContainer> world = new List<TileContainer>();
+
         public static string ModPath
         {
             get
